@@ -278,6 +278,17 @@ namespace aspect
            * Input parameters for the drucker prager plasticity.
            */
           Rheology::DruckerPragerParameters drucker_prager_parameters;
+          
+          
+        /**
+          * Bool indicating whether to use a time dependent effective viscosity 
+          * based on the Maxwell viscoelastic time dependent viscosity shown in  
+          * Kaus & Becker (2007) (if true), or to use the formulation for the 
+          * effective viscosity of (equation 28 in Moresi et al., 2003, J. Comp. Phys.).
+          * Read from parameter file. 
+          */
+          bool use_time_dependent_viscosity; 
+          
 
       };
     }

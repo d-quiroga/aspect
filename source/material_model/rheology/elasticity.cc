@@ -96,6 +96,12 @@ namespace aspect
                            Patterns::Bool (),
                            "Whether to apply a stress averaging scheme to account for differences "
                            "between the fixed elastic time step and numerical time step. ");
+        /*prm.declare_entry ("Use time dependent viscosity", "false",
+                           Patterns::Bool(),
+                           "Select whether the effective viscosity should follow the time independent "
+                           "formulation in (eqn 28 in Moresi et al., 2003, J. Comp. Phys.) (if true)"
+                           "or if it should follow the time dependent formulation in  (eq 5 in Kaus "
+                           "& Becker., 2007). The default value is 'false'.");  */                         
       }
 
 
@@ -110,6 +116,8 @@ namespace aspect
         elastic_shear_moduli = Utilities::possibly_extend_from_1_to_N (Utilities::string_to_double(Utilities::split_string_list(prm.get("Elastic shear moduli"))),
                                                                        n_fields,
                                                                        "Elastic shear moduli");
+                                                                       
+	//use_time_dependent_viscosity = prm.get_bool ("Use time dependent viscosity");
 
         if (prm.get ("Use fixed elastic time step") == "true")
           use_fixed_elastic_time_step = true;
@@ -356,10 +364,21 @@ namespace aspect
       double
       Elasticity<dim>::
       calculate_viscoelastic_viscosity (const double viscosity,
-                                        const double elastic_shear_modulus) const
+                                        const double elastic_shear_modulus, bool use_time_dependent_viscosity) const
       {
-        const double elastic_viscosity = elastic_shear_modulus*elastic_timestep();
-        return 1. / (1./elastic_viscosity + 1./viscosity);
+        if (use_time_dependent_viscosity == true)
+        {
+          double time = this->get_time(); 
+          double relaxation_time = viscosity/elastic_shear_modulus;
+          double elastic_viscosity = elastic_shear_modulus*elastic_timestep();
+          double initial_viscosity = 1. / (1./elastic_viscosity + 1./viscosity);
+          return viscosity-(viscosity-initial_viscosity)*exp(-time/relaxation_time);
+        }
+        else
+        {    
+          const double elastic_viscosity = elastic_shear_modulus*elastic_timestep();
+          return 1. / (1./elastic_viscosity + 1./viscosity);
+        }
       }
 
 

@@ -221,7 +221,7 @@ namespace aspect
 
                 // Step 2a: calculate viscoelastic (effective) viscosity
                 viscosity_pre_yield = elastic_rheology.calculate_viscoelastic_viscosity(viscosity_pre_yield,
-                                                                                        elastic_shear_moduli[j]);
+                                                                                        elastic_shear_moduli[j],use_time_dependent_viscosity);
               }
 
             // Step 2b: calculate current (viscous or viscous + elastic) stress magnitude
@@ -542,6 +542,14 @@ namespace aspect
         prm.declare_entry ("Include viscoelasticity", "false",
                            Patterns::Bool (),
                            "Whether to include elastic effects in the rheological formulation.");
+                           
+  	prm.declare_entry ("Use time dependent viscosity", "false",
+		           Patterns::Bool(),
+		           "Select whether the effective viscosity should follow the time independent "
+		           "formulation in (eqn 28 in Moresi et al., 2003, J. Comp. Phys.) (if true)"
+		           "or if it should follow the time dependent formulation in  (eq 5 in Kaus "
+		           "& Becker., 2007). The default value is 'false'.");                            
+                           
       }
 
 
@@ -646,6 +654,8 @@ namespace aspect
                        ExcMessage("If adiabatic heating is enabled you should not add another adiabatic gradient"
                                   "to the temperature for computing the viscosity, because the ambient"
                                   "temperature profile already includes the adiabatic gradient."));
+
+        use_time_dependent_viscosity = prm.get_bool ("Use time dependent viscosity");
 
       }
 

@@ -77,7 +77,7 @@ namespace aspect
 
           // Average viscoelastic (e.g., effective) viscosity (equation 28 in Moresi et al., 2003, J. Comp. Phys.)
           out.viscosities[i] = elastic_rheology.calculate_viscoelastic_viscosity(average_viscosity,
-                                                                                 average_elastic_shear_moduli[i]);
+                                                                                 average_elastic_shear_moduli[i],use_time_dependent_viscosity);
 
           // Fill the material properties that are part of the elastic additional outputs
           if (ElasticAdditionalOutputs<dim> *elastic_out = out.template get_additional_output<ElasticAdditionalOutputs<dim> >())
@@ -136,6 +136,12 @@ namespace aspect
                              "with different viscosities, we need to come up with an average "
                              "viscosity at that point.  Select a weighted harmonic, arithmetic, "
                              "geometric, or maximum composition.");
+        prm.declare_entry ("Use time dependent viscosity", "false",
+                           Patterns::Bool(),
+                           "Select whether the effective viscosity should follow the time independent "
+                           "formulation in (eqn 28 in Moresi et al., 2003, J. Comp. Phys.) (if true)"
+                           "or if it should follow the time dependent formulation in  (eq 5 in Kaus "
+                           "& Becker., 2007). The default value is 'false'.");                               
         }
         prm.leave_subsection();
       }
@@ -160,6 +166,8 @@ namespace aspect
           // Equation of state parameters
           equation_of_state.initialize_simulator (this->get_simulator());
           equation_of_state.parse_parameters (prm);
+          
+
 
           elastic_rheology.initialize_simulator (this->get_simulator());
           elastic_rheology.parse_parameters(prm);
@@ -174,6 +182,8 @@ namespace aspect
           thermal_conductivities = Utilities::possibly_extend_from_1_to_N (Utilities::string_to_double(Utilities::split_string_list(prm.get("Thermal conductivities"))),
                                                                            n_fields,
                                                                            "Thermal conductivities");
+                                                                           
+          use_time_dependent_viscosity = prm.get_bool ("Use time dependent viscosity");                                                                           
         }
         prm.leave_subsection();
       }

@@ -113,10 +113,11 @@ namespace aspect
           /**
            * Given the (viscous or visco-plastic) viscosity and the shear modulus, compute the viscoelastic
            * viscosity (eqn 28 in Moresi et al., 2003, J. Comp. Phys.).
+           * Or use time dependent viscoelastic viscosity (eq 5 in Kaus & Becker., 2007)
            */
           double
           calculate_viscoelastic_viscosity (const double viscosity,
-                                            const double shear_modulus) const;
+                                            const double shear_modulus, bool use_time_dependent_viscosity) const;
 
           /**
            * Calculate the square root of the second moment invariant for the deviatoric
@@ -159,7 +160,8 @@ namespace aspect
           /**
            * Double for fixed elastic time step value, read from parameter file
            */
-          double fixed_elastic_time_step;
+          double fixed_elastic_time_step;       
+          
       };
     }
   }
